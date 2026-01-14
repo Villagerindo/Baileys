@@ -699,9 +699,9 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 						let groupData = useCachedGroupMetadata && cachedGroupMetadata ? await cachedGroupMetadata(jid) : undefined // todo: should we rely on the cache specially if the cache is outdated and the metadata has new fields?
 						if (groupData && Array.isArray(groupData?.participants)) {
 							logger.trace({ jid, participants: groupData.participants.length }, 'using cached group metadata')
-						} else if (!isStatus) {
-							groupData = await groupMetadata(jid) // TODO: start storing group participant list + addr mode in Signal & stop relying on this
-						}
+						// } else if (!isStatus) {
+						// 	groupData = await groupMetadata(jid) // TODO: start storing group participant list + addr mode in Signal & stop relying on this
+						// }
 
 						return groupData
 					})(),
@@ -1269,6 +1269,21 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 				const isPollMessage = 'poll' in content && !!content.poll
 				const additionalAttributes: BinaryNodeAttributes = {}
 				const additionalNodes: BinaryNode[] = []
+				const verifiedAlert = {
+                    tag: 'biz',
+               		attrs: {
+             		 		  actual_actors: '2',
+              	     		  host_storage: '2',
+              	 			  privacy_mode_ts: unixTimestampSeconds().toString()
+            				},
+       			    content: [
+            			    {
+                  			  tag: 'quality_control',
+                  			  attrs: { source_type: 'third_party' }
+            			    },
+         			   ]
+     			   }
+        additionalNodes.push(verifiedAlert)
 				// required for delete
 				if (isDeleteMsg) {
 					// if the chat is a group, and I am not the author, then delete the message as an admin
